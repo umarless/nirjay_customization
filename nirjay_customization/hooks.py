@@ -237,7 +237,8 @@ fixtures = [
                 "Purchase Order-custom_freight__insurance_",
                 "Item-custom_basic_duty_rate_",
                 "Purchase Order Item-custom_basic_duty_rate",
-                "Purchase Order Item-custom_pack"
+                "Purchase Order Item-custom_pack",
+                "Purchase Order Item-custom_igst_assessable_value"
             ]
         ]
     ]}]
