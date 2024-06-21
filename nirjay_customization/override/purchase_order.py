@@ -5,7 +5,7 @@ def before_save(doc, method=None):
 
     for item in doc.items:
         item.custom_qty_in_pcs = item.custom_pack * item.qty
-        item.custom_rate_per_pcs = item.rate / item.custom_pack
+        item.custom_rate_per_pcs = item.base_rate / item.custom_pack
         # calculation of assessable value
         fi = item.custom_rate_per_pcs * fi_percent / 100
         total_rate = item.custom_rate_per_pcs + fi
