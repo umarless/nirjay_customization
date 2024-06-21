@@ -124,7 +124,7 @@ app_license = "mit"
 
 doc_events = {
 	"Purchase Order": {
-		"before_save": "nirjay_customization.nirjay_customization.override.purchase_order.before_save"
+		"before_save": "nirjay_customization.override.purchase_order.before_save"
 	}
 }
 
