@@ -236,7 +236,9 @@ fixtures = [
                 "Item-custom_basic_duty_rate_",
                 "Purchase Order Item-custom_basic_duty_rate",
                 "Purchase Order Item-custom_pack",
-                "Purchase Order Item-custom_igst_assessable_value"
+                "Purchase Order Item-custom_igst_assessable_value",
+                "Purchase Order-custom_column_break_hf6vn",
+                "Purchase Order-custom_total_igst_assessable_value"
             ]
         ]
     ]}]
