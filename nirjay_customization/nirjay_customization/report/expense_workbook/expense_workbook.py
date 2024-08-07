@@ -276,7 +276,30 @@ def get_data(filters):
 	)
 
 	data2 = query.run(as_dict=True)
+	# custom_expense_against_purchase_order
+	query2 = (
+		frappe.qb.from_(pi)
+		.left_join(pi_item)
+		.on(pi.name == pi_item.parent)
+		.select(
+			pi.custom_is_expense,
+			pi.custom_expense_against_purchase_order,
+			pi.name,
+			pi.docstatus,
+			pi.supplier,
+			pi.grand_total.as_("amount"),
+			pi.currency,
+			pi_item.item_name,
+			pi_item.item_code,
+		)
+		.where((pi.custom_expense_against_purchase_order == filters.name) & (pi.custom_is_expense == 1) & (pi.docstatus == 1))
+	)
+
+	expenses = query2.run(as_dict=True)
+	# frappe.errprint(expenses)
 	
+	# query2 = [{'is_expense': 1, 'payment_against_po': 'PUR-ORD-2024-00001', 'name': 'ACC-PINV-2024-00005', 'docstatus': 1, 'supplier': 'Department of Custom Duty', 'amount': 15000.0, 'currency': 'INR', 'item_name': 'Custom Duty', 'item_code': 'Custom Duty'}, {'is_expense': 1, 'payment_against_po': 'PUR-ORD-2024-00001', 'name': 'ACC-PINV-2024-00004-1', 'docstatus': 1, 'supplier': 'Freight Agent', 'amount': 5000.0, 'currency': 'INR', 'item_name': 'Sea Freight', 'item_code': 'Sea Freight'}]
+
 	# data = frappe.db.get_all('Purchase Order',
 	# 	filters={
 	# 		'name': filters.name
@@ -285,9 +308,11 @@ def get_data(filters):
 	# )
 
 	# frappe.errprint(data2)
-	# frappe.errprint(po)	
+	# frappe.errprint(po)
+
 	second_row = {'particulars': 'Advance Paid'}
 	third_row = {'particulars': 'Party Total Balance'}
+	fourth_row = {'particulars': ''}
 
 	for p in data2:
 		second_row['amount']  = p.advance_paid
@@ -296,10 +321,13 @@ def get_data(filters):
  
 	data2.append(second_row)
 	data2.append(third_row)
-	# frappe.errprint(data2)
+	data2.append(fourth_row)
 
-	# frappe.errprint(data2)
-	# frappe.errprint(data)	
+	if query2:
+		for e in expenses:
+			new_row = {'particulars': e.item_name, 'amount': e.amount}
+			data2.append(new_row)
+
 	return data2
 
 def validate_filters(filters):
