@@ -296,7 +296,7 @@ def get_data(filters):
  
 	data2.append(second_row)
 	data2.append(third_row)
-	frappe.errprint(data2)	
+	# frappe.errprint(data2)
 
 	# frappe.errprint(data2)
 	# frappe.errprint(data)	
