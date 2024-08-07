@@ -5,7 +5,7 @@ def before_save(doc, method=None):
     custom_total_igst_assessable_value = 0
      
     for item in doc.items:
-        if item.custom_pack and custom_basic_duty_rate:
+        if item.custom_pack and item.custom_basic_duty_rate:
             item.custom_qty_in_pcs = item.custom_pack * item.qty
             item.custom_rate_per_pcs = item.base_rate / item.custom_pack
             # calculation of assessable value
