@@ -40,7 +40,7 @@ def get_columns(filters):
             "label": _("Particulars"),
             "fieldname": "particulars",
             "fieldtype": "Data",
-            "width": 400,
+            "width": 450,
         },
         {
             "label": _("Mode of Payment"),
@@ -87,7 +87,6 @@ def get_columns(filters):
     ]
 
 def get_data(filters):
-
     po = frappe.qb.DocType("Purchase Order")
     pi = frappe.qb.DocType("Purchase Invoice")
     # po_item = frappe.qb.DocType("Purchase Order Item")
@@ -159,6 +158,7 @@ def get_data(filters):
             pi.docstatus,
             pi.supplier,
             pi.grand_total,
+            pi.total,
             pi.taxes_and_charges,
             pi.total_taxes_and_charges,
             pi.base_grand_total.as_("amount"),
@@ -183,7 +183,9 @@ def get_data(filters):
             pi.currency,
             pi.conversion_rate,
             pi.grand_total,
-            pi.base_grand_total.as_("amount"),
+            pi.total_advance,
+            pi.base_grand_total,
+            pi.outstanding_amount,
             pi.currency,
             pi_item.item_name,
             pi_item.item_code,
@@ -196,53 +198,73 @@ def get_data(filters):
 
     newdata = []
     
+    todays_rate = get_exchange_rate(data[0].currency, 'INR', today())
+    total_unpaid = get_balance_on(party_type='Supplier', party= data[0].supplier)
+    po_balance = 0
+    total_allocated_amount = 0
+    po_grand_total = 0
+    # if total_unpaid:
+    #     total_unpaid *= -1
+
+    # incase of only one advance payment against selected PO
     if data and len(data) == 1:
         for p in data:
+            po_grand_total = p.grand_total
             first_row = {
-                            'particulars': p.supplier + ' ' + p.date.strftime('%d-%m-%Y')+' '+ p.currency +' '+ str(p.grand_total) +'@' + str(p.conversion_rate),
+                            'particulars': p.supplier + ' ' + p.date.strftime('%d-%m-%Y')+' '+ p.currency +' '+ str(po_grand_total) +'@' + str(p.conversion_rate),
                             'amount': p.amount
                         }
-            
-            todays_rate = get_exchange_rate(data[0].currency, 'INR', today())
 
             if p.allocated_amount:
+                total_allocated_amount += p.allocated_amount
                 second_row = {
                                 'particulars': 'Advance Paid - ' + p.currency +' '+ str(p.allocated_amount) +'@' + str(p.exchange_rate),
                                 'amount' : p.allocated_amount * p.exchange_rate
                             }
-                # get_balance_on(party_type='Supplier', party= p.supplier)
-                party_balance = p.total_amount - p.allocated_amount
+                
+                po_balance = p.grand_total - p.allocated_amount
                 
                 third_row = {
-                            'particulars': 'Party Balance - ' + p.currency + ' ' + str(party_balance) + '@' + str(todays_rate),
-                            'amount': party_balance * todays_rate
+                            'particulars': 'Balance - ' + p.currency + ' ' + str(po_balance) + '@' + str(todays_rate),
+                            'amount': po_balance * todays_rate
                         }
             else:
+                total_allocated_amount = p.advance_paid
                 second_row = {
-                                'particulars': 'Advance Paid - ' + p.currency +' '+ str(p.advance_paid) +'@' + str(p.conversion_rate),
+                                'particulars': 'Advance Paid - '+ p.currency +' '+ str(p.advance_paid) +'@' + str(p.conversion_rate),
                                 'amount' : p.advance_paid * p.conversion_rate
                             }
+                
+                po_balance = p.grand_total
+                
                 third_row = {
-                            'particulars': 'Party Balance - ' + p.currency + ' ' + str(p.grand_total) + '@' + str(todays_rate),
+                            'particulars': 'Balance - ' + p.currency + ' ' + str(po_balance) + '@' + str(todays_rate),
                             'amount': p.grand_total * todays_rate
                         }
             
-        fourth_row = {'particulars': ''}
-        
+            # fourth_row = {
+            #     'particulars': 'Previous Party Balance - ' + data[0].currency + ' ' +str(total_unpaid) + '@' + str(todays_rate),
+            #     'amount': total_unpaid * todays_rate
+            # }
+       
         newdata.append(first_row)
         newdata.append(second_row)
         newdata.append(third_row)
-        newdata.append(fourth_row)
+        # newdata.append(fourth_row)
+        
+            #if pi is not created then total unpaid amount row will go ====> po_balance + total_unpaid = total_party_balance
+            # if pi is already created against this po then row for total payable or balance will go ====> po_balance ===> pi is created against this po ===> total_unpaid
 
+        # incase of more than one advance payments against selected PO
     elif data and len(data) > 1:
+        po_grand_total = data[0].grand_total
         first_row = {
-                        'particulars': data[0].supplier + ' ' + data[0].date.strftime('%d-%m-%Y')+' '+ data[0].currency +' '+ str(data[0].grand_total) +'@' + str(data[0].conversion_rate),
+                        'particulars': data[0].supplier + ' ' + data[0].date.strftime('%d-%m-%Y')+' '+ data[0].currency +' '+ str(po_grand_total) +'@' + str(data[0].conversion_rate),
                         'amount': data[0].amount
                     }
         
         newdata.append(first_row)
         
-        total_allocated_amount = 0
         for p in data:
             second_row = {
                             'particulars': 'Advance Paid - ' + p.currency +' '+ str(p.allocated_amount) +'@' + str(p.exchange_rate),
@@ -251,40 +273,129 @@ def get_data(filters):
             total_allocated_amount += p.allocated_amount
             newdata.append(second_row)
         
-        # get_balance_on(party_type='Supplier', party= p.supplier)
-        party_balance = data[0].total_amount - total_allocated_amount
-        todays_rate = get_exchange_rate(data[0].currency, 'INR', today())
+        po_balance = po_grand_total - total_allocated_amount
 
         third_row = {
-                        'particulars': 'Party Balance - ' + data[0].currency + ' ' + str(party_balance) + '@' + str(todays_rate),
-                        'amount': party_balance * todays_rate
+                        'particulars': 'Balance - ' + data[0].currency + ' ' + str(po_balance) + '@' + str(todays_rate),
+                        'amount': po_balance * todays_rate
                     }
-           
-        fourth_row = {'particulars': ''}
+        
+        # fourth_row = {
+        #     'particulars': 'Previous Party Balance - ' + data[0].currency + ' ' +str(total_unpaid) + '@' + str(todays_rate),
+        #     'amount': total_unpaid * todays_rate
+        # }
         
         newdata.append(third_row)
-        newdata.append(fourth_row)
+        # newdata.append(fourth_row)
     
     # if pi created with po
     # if only one pi created for one po
-    if pi_data:
-        frappe.errprint(pi_data)
-        new_row = {
-                    'particulars': 'Purchase Invioce Value - ' + pi_data[0].currency + ' ' + str(pi_data[0].grand_total) +'@'+ str(pi_data[0].conversion_rate),
-                    'amount': pi_data[0].grand_total * pi_data[0].conversion_rate
-                }
-    else:
-        new_row = {
-                    'particulars': 'Purchase Invoice not created for this Purchase Order',
-                    'amount': ''
-                }
 
-    newdata.append(new_row)
+    # total_unpaid can be 0 +ve and -ve
+    # if pi created then total_allocated_amount is zero
+    sixth_row = {}
+    if pi_data:
+        pi_name = pi_data[0].name
+        fourth_row = {
+            'particulars': 'Purchase Invioce - ' + pi_name,
+            'amount': pi_data[0].base_grand_total
+        }
+        fifth_row = {
+            'particulars': 'Advance Paid- ' + pi_data[0].currency + ' ' + str(pi_data[0].total_advance) + '@' + str(pi_data[0].conversion_rate),
+            'amount': pi_data[0].total_advance * pi_data[0].conversion_rate
+        }
+
+        if total_unpaid > 0 and pi_data[0].outstanding_amount == 0:
+            sixth_row = {
+                'particulars': 'Total Party Balance - Already Paid',
+                'amount': ''
+            }
+        elif total_unpaid < 0:
+            sixth_row = {
+                'particulars': 'Total Party Balance - ' + data[0].currency + ' ' + str(total_unpaid * -1) +'@'+ str(todays_rate),
+                'amount': total_unpaid * todays_rate * -1
+            }
+        else:
+            sixth_row = {
+                'particulars': 'Total Party Balance - ' + data[0].currency + ' ' + str(total_unpaid) +'@'+ str(todays_rate),
+                'amount': total_unpaid * todays_rate
+            }
+    else:
+        if total_unpaid > 0 and po_balance > total_unpaid:
+            if total_allocated_amount == total_unpaid:
+                fourth_row = {
+                    'particulars': 'Previous Party Balance - ' + data[0].currency + ' ' + str(total_unpaid * -1) +'@'+ str(todays_rate),
+                    'amount': total_unpaid * todays_rate * -1
+                }
+                fifth_row = {
+                    'particulars': 'Total Party Balance - '  + data[0].currency + ' ' + str(po_balance) +'@'+ str(todays_rate),
+                    'amount': (po_balance) * todays_rate
+                }
+            else:
+                fourth_row = {
+                    'particulars': 'Party Balance - ' + data[0].currency + ' ' + str(total_unpaid * -1) +'@'+ str(todays_rate),
+                    'amount': total_unpaid * todays_rate * -1
+                }
+                
+                fifth_row = {
+                    'particulars': 'Total Party Balance - '  + data[0].currency + ' ' + str(po_balance - total_unpaid) +'@'+ str(todays_rate),
+                    'amount': (po_balance - total_unpaid) * todays_rate
+                }
+        elif total_unpaid > 0 and po_balance < total_unpaid:
+            if total_allocated_amount == total_unpaid:
+                fourth_row = {
+                    'particulars': 'Previous Party Balance - ' + data[0].currency + ' ' + str(total_unpaid * -1) +'@'+ str(todays_rate),
+                    'amount': total_unpaid * todays_rate * -1
+                }
+                
+                fifth_row = {
+                    'particulars': 'Total Party Balance - '  + data[0].currency + ' ' + str(po_balance) +'@'+ str(todays_rate),
+                    'amount': po_balance * todays_rate
+                }
+            else:
+                fourth_row = {
+                    'particulars': 'Previous Party Balance - ' + data[0].currency + ' ' + str(total_unpaid * -1) +'@'+ str(todays_rate),
+                    'amount': total_unpaid * todays_rate * -1
+                }
+                
+                fifth_row = {
+                    'particulars': 'Total Party Balance - '  + data[0].currency + ' ' + str(po_balance) +'@'+ str(todays_rate),
+                    'amount': po_balance * todays_rate
+                }
+        elif total_unpaid == 0:
+            fourth_row = {
+                'particulars': 'Previous Party Balance - ' + data[0].currency + ' ' + str(total_unpaid) +'@'+ str(todays_rate),
+                'amount': total_unpaid * todays_rate
+            }
+            fifth_row = {
+                'particulars': 'Total Party Balance - ' + data[0].currency + ' ' + str(po_balance) +'@'+ str(todays_rate),
+                'amount': po_balance * todays_rate
+            }
+        else:
+            fourth_row = {
+                'particulars': 'Previous Party Balance - ' + data[0].currency + ' ' + str(total_unpaid * -1) +'@'+ str(todays_rate),
+                'amount': total_unpaid * todays_rate * -1
+            }
+            fifth_row = {
+                'particulars': 'Total Party Balance - ' + data[0].currency + ' ' + str(-1 * total_unpaid + po_balance) +'@'+ str(todays_rate),
+                'amount': (-1 * total_unpaid + po_balance) * todays_rate
+            }
+
+    newdata.append(fourth_row)
+    newdata.append(fifth_row)
+    if sixth_row:
+        newdata.append(sixth_row)
 
     # all expense invoices currency is INR
     # only one expense in one pi
 
     if expenses:
+        blank_row = {
+            'particulars': '***Expenses***',
+            'amount': ''
+        }
+        newdata.append(blank_row)
+
         for e in expenses:
             # for igst, cgst and sgst
             if e.taxes_and_charges:
@@ -298,7 +409,8 @@ def get_data(filters):
                         tnc.description,
                         tnc.tax_amount,
                         tnc.rate,
-                        pi.grand_total
+                        pi.grand_total,
+                        pi.total
                     )
                     .where((tnc.parent == filters.name) & (pi.custom_is_expense == 1) & (pi.docstatus == 1))
                 )
@@ -309,6 +421,7 @@ def get_data(filters):
                 new_row = {
                         'particulars': e.item_name,
                         'amount': e.amount,
+                        'net_amount': e.total,
                         'sgst': e.total_taxes_and_charges / 2,
                         'cgst':  e.total_taxes_and_charges /2
                     }
