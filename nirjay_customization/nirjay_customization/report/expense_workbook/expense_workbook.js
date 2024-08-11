@@ -7,7 +7,10 @@ frappe.query_reports["Expense Workbook"] = {
 			fieldname: "name",
 			label: __("Purchase Order"),
 			fieldtype: "Link",
-			options: "Purchase Order"
+			options: "Purchase Order",
+			filters: {
+                "docstatus": ["=", "1"]
+            },
 		}
 	]
 };
