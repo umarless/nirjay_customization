@@ -429,16 +429,16 @@ def get_data(filters):
             if e.sgst_amount and e.cgst_amount:
                 new_row = {
                         'particulars': e.item_name,
-                        'amount': e.base_amount,
-                        'net_amount': e.base_net_amount + e.sgst_amount + e.cgst_amount,
+                        'amount': e.base_net_amount + e.sgst_amount + e.cgst_amount,
+                        'net_amount': e.base_net_amount,
                         'sgst': e.sgst_amount,
                         'cgst':  e.cgst_amount
                     }
             elif e.igst_amount:
                 new_row = {
                         'particulars': e.item_name,
-                        'amount': e.base_amount,
-                        'net_amount': e.base_net_amount + e.igst_amount,
+                        'amount': e.base_net_amount + e.igst_amount,
+                        'net_amount': e.base_net_amount,
                         'igst': e.igst_amount
                     }
             else:
