@@ -165,6 +165,11 @@ def get_data(filters):
             pi.currency,
             pi_item.item_name,
             pi_item.item_code,
+            pi_item.base_amount,
+            pi_item.igst_amount,
+            pi_item.sgst_amount,
+            pi_item.cgst_amount,
+            pi_item.amount
         )
         .where((pi.custom_expense_against_purchase_order == filters.name) & (pi.custom_is_expense == 1) & (pi.docstatus == 1))
     )
@@ -189,6 +194,8 @@ def get_data(filters):
             pi.currency,
             pi_item.item_name,
             pi_item.item_code,
+            pi_item.base_amount,
+            pi_item.amount,
             pi_item.purchase_order
         )
         .where((pi_item.purchase_order == filters.name) & (pi.custom_is_expense == 0) & (pi.docstatus == 1))
@@ -397,38 +404,46 @@ def get_data(filters):
         newdata.append(blank_row)
 
         for e in expenses:
+            frappe.errprint(e)
             # for igst, cgst and sgst
-            if e.taxes_and_charges:
-                tnc_query = (
-                    frappe.qb.from_(pi)
-                    .left_join(tnc)
-                    .on(pi.name == tnc.parent)
-                    .select(
-                        pi.total_taxes_and_charges,
-                        pi.name,
-                        tnc.description,
-                        tnc.tax_amount,
-                        tnc.rate,
-                        pi.grand_total,
-                        pi.total
-                    )
-                    .where((tnc.parent == filters.name) & (pi.custom_is_expense == 1) & (pi.docstatus == 1))
-                )
+            # if e.taxes_and_charges:
+            #     tnc_query = (
+            #         frappe.qb.from_(pi)
+            #         .left_join(tnc)
+            #         .on(pi.name == tnc.parent)
+            #         .select(
+            #             pi.total_taxes_and_charges,
+            #             pi.name,
+            #             tnc.description,
+            #             tnc.tax_amount,
+            #             tnc.rate,
+            #             pi.grand_total,
+            #             pi.total
+            #         )
+            #         .where((tnc.parent == filters.name) & (pi.custom_is_expense == 1) & (pi.docstatus == 1))
+            #     )
 
-                taxes = tnc_query.run(as_dict=True)
+            # taxes = tnc_query.run(as_dict=True)
             
-            if e.total_taxes_and_charges:
+            if e.sgst_amount and e.cgst_amount:
                 new_row = {
                         'particulars': e.item_name,
-                        'amount': e.amount,
+                        'amount': e.base_amount,
                         'net_amount': e.total,
-                        'sgst': e.total_taxes_and_charges / 2,
-                        'cgst':  e.total_taxes_and_charges /2
+                        'sgst': e.sgst_amount,
+                        'cgst':  e.cgst_amount
+                    }
+            elif e.igst_amount:
+                new_row = {
+                        'particulars': e.item_name,
+                        'amount': e.base_amount,
+                        'net_amount': e.total,
+                        'igst': e.igst_amount
                     }
             else:
                 new_row = {
                         'particulars': e.item_name,
-                        'amount': e.amount
+                        'amount': e.base_amount
                     }
             
             newdata.append(new_row)
