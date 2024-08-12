@@ -406,7 +406,6 @@ def get_data(filters):
         newdata.append(blank_row)
 
         for e in expenses:
-            frappe.errprint(e)
             # for igst, cgst and sgst
             # if e.taxes_and_charges:
             #     tnc_query = (
