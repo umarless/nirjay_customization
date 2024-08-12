@@ -165,6 +165,8 @@ def get_data(filters):
             pi.currency,
             pi_item.item_name,
             pi_item.item_code,
+            pi_item.base_net_amount,
+            pi_item.net_amount,
             pi_item.base_amount,
             pi_item.igst_amount,
             pi_item.sgst_amount,
@@ -429,7 +431,7 @@ def get_data(filters):
                 new_row = {
                         'particulars': e.item_name,
                         'amount': e.base_amount,
-                        'net_amount': e.total,
+                        'net_amount': e.base_net_amount + e.sgst_amount + e.cgst_amount,
                         'sgst': e.sgst_amount,
                         'cgst':  e.cgst_amount
                     }
@@ -437,7 +439,7 @@ def get_data(filters):
                 new_row = {
                         'particulars': e.item_name,
                         'amount': e.base_amount,
-                        'net_amount': e.total,
+                        'net_amount': e.base_net_amount + e.igst_amount,
                         'igst': e.igst_amount
                     }
             else:
