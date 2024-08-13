@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import flt
+import erpnext
 from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import today
@@ -14,6 +16,13 @@ from erpnext.accounts.utils import (
     get_party_types_from_account_type,
 )
 
+
+po = frappe.qb.DocType("Purchase Order")
+pi = frappe.qb.DocType("Purchase Invoice")
+pi_item = frappe.qb.DocType("Purchase Invoice Item")
+per = frappe.qb.DocType("Payment Entry Reference")
+tnc = frappe.qb.DocType("Purchase Taxes and Charges")
+
 # def execute(filters=None):
 # 	columns, data = [], []
 # 	return columns, data
@@ -24,29 +33,146 @@ def execute(filters=None):
 
     validate_filters(filters)
 
-    columns = get_columns(filters)
+    # po_name = None
+    # if filters.get('name'):
+    #     po_name = filters.get('name')
+
+    # company_currency = erpnext.get_company_currency(filters.get("company"))
+
+    # po_details = get_po_details(po_name)
+
     data = get_data(filters)
+    columns = get_columns()
+    gst_columns =[]
+    for d in data:
+        if "igst_rate" in d:
+            column = {
+                "label": _("IGST " + str(d["igst_rate"]) + "%"),
+                "fieldname": "igst" + str(d["igst_rate"]),
+                "fieldtype": "Currency",
+                "width": 110,
+            }
+            if column not in gst_columns:
+                gst_columns.append(column)
+
+        if "sgst_rate" in d:
+            column = {
+                "label": _("SGST " + str(d["sgst_rate"]) + "%"),
+                "fieldname": "sgst" + str(d["sgst_rate"]),
+                "fieldtype": "Currency",
+                "width": 110,
+            }
+            if column not in gst_columns:
+                gst_columns.append(column)
+            
+        if "cgst_rate" in d:
+            column = {
+                "label": _("CGST " + str(d["cgst_rate"]) + "%"),
+                "fieldname": "cgst" + str(d["cgst_rate"]),
+                "fieldtype": "Currency",
+                "width": 110,
+            }
+            if column not in gst_columns:
+                gst_columns.append(column)
+
+    if gst_columns:
+        i = len(columns) - 1
+        # columns.extend(gst_columns)
+        columns = columns[:i] + gst_columns + columns[i:]
 
     if not data:
         return [], [], None, []
 
     # data, chart_data = prepare_data(data, filters)
-
     return columns, data, None
 
-def get_columns(filters):
-    return [
+# def get_po_details(po_name):
+#     pi_exists = frappe.db.exists("Purchase Invoice Item", {"purchase_order": po_name, "docstatus": 1})
+#     per_exists = frappe.db.exists("Payment Entry Reference", {"reference_name": po_name, "docstatus": 1})
+#     expenses_exists = frappe.db.exists("Purchase Invoice", {
+#         "custom_is_expense": 1,
+#         "docstatus": 1,
+#         "custom_expense_against_purchase_order": po_name
+#     })
+    
+#     if pi_exists:
+#         query = (
+#             frappe.qb.from_(pi)
+#             .left_join(pi_item)
+#             .on(pi.name == pi_item.parent)
+#             .select(
+#                 pi.custom_is_expense,
+#                 pi.name,
+#                 pi.docstatus,
+#                 pi.supplier,
+#                 pi.currency,
+#                 pi.conversion_rate,
+#                 pi.grand_total,
+#                 pi.total_advance,
+#                 pi.base_grand_total,
+#                 pi.outstanding_amount,
+#                 pi.currency,
+#                 pi_item.item_name,
+#                 pi_item.item_code,
+#                 pi_item.base_amount,
+#                 pi_item.amount,
+#                 pi_item.cgst_rate,
+#                 pi_item.igst_rate,
+#                 pi_item.sgst_rate,
+#                 pi_item.cgst_amount,
+#                 pi_item.igst_amount,
+#                 pi_item.sgst_amount,
+#                 pi_item.purchase_order
+#             )
+#             .where((pi_item.purchase_order == po_name) & (pi.custom_is_expense == 0) & (pi.docstatus == 1))
+#         )
+    
+#     if per_exists:
+#         query = (
+#             frappe.qb.from_(po)
+#             .left_join(per)
+#             .on(po.name == per.reference_name)
+#             .select(
+#                 po.transaction_date.as_("date"),
+#                 po.name,
+#                 po.status,
+#                 po.supplier,
+#                 po.base_grand_total,
+#                 po.currency,
+#                 po.conversion_rate,
+#                 po.custom_freight__insurance_,
+#                 po.base_total,
+#                 po.advance_paid,
+#                 po.grand_total,
+#                 po.base_grand_total,
+#                 per.exchange_rate,
+#                 per.outstanding_amount,
+#                 per.total_amount,
+#                 per.allocated_amount,
+#             )
+#             .where((po.name == po_name) & (po.docstatus == 1) & (per.docstatus == 1))
+#         )
+
+#     if not pi_exists and not per_exists:
+#         query = frappe.qb.from_(po).select(po.star).where(po.docstatus == 1)
+
+#     po_details = query.run(as_dict=1)
+
+#     return po_details or []
+
+def get_columns():
+    columns = [
         {
             "label": _("Particulars"),
             "fieldname": "particulars",
             "fieldtype": "Data",
-            "width": 450,
+            "width": 420,
         },
         {
             "label": _("Mode of Payment"),
             "fieldname": "mode",
             "fieldtype": "Data",
-            "width": 220,
+            "width": 150,
         },
         {
             "label": _("Amount"),
@@ -61,38 +187,16 @@ def get_columns(filters):
             "width": 120,
         },
         {
-            "label": _("IGST 18%"),
-            "fieldname": "igst",
-            "fieldtype": "Currency",
-            "width": 120,
-        },
-        {
-            "label": _("CGST 9%"),
-            "fieldname": "cgst",
-            "fieldtype": "Currency",
-            "width": 120,
-        },
-        {
-            "label": _("SGST 9%"),
-            "fieldname": "sgst",
-            "fieldtype": "Currency",
-            "width": 120,
-        },
-        {
             "label": _("Overall Expense %"),
             "fieldname": "overall_expense",
             "fieldtype": "Float",
-            "width": 180,	
+            "width": 150,	
         },
     ]
 
+    return columns
+
 def get_data(filters):
-    po = frappe.qb.DocType("Purchase Order")
-    pi = frappe.qb.DocType("Purchase Invoice")
-    # po_item = frappe.qb.DocType("Purchase Order Item")
-    pi_item = frappe.qb.DocType("Purchase Invoice Item")
-    per = frappe.qb.DocType("Payment Entry Reference")
-    tnc = frappe.qb.DocType("Purchase Taxes and Charges")
 
     payment_entry_exists = frappe.db.exists("Payment Entry Reference", {"reference_name": filters.name, "docstatus": 1})
 
@@ -168,6 +272,9 @@ def get_data(filters):
             pi_item.base_net_amount,
             pi_item.net_amount,
             pi_item.base_amount,
+            pi_item.cgst_rate,
+            pi_item.igst_rate,
+            pi_item.sgst_rate,
             pi_item.igst_amount,
             pi_item.sgst_amount,
             pi_item.cgst_amount,
@@ -198,6 +305,12 @@ def get_data(filters):
             pi_item.item_code,
             pi_item.base_amount,
             pi_item.amount,
+            pi_item.cgst_rate,
+            pi_item.igst_rate,
+            pi_item.sgst_rate,
+            pi_item.cgst_amount,
+            pi_item.igst_amount,
+            pi_item.sgst_amount,
             pi_item.purchase_order
         )
         .where((pi_item.purchase_order == filters.name) & (pi.custom_is_expense == 0) & (pi.docstatus == 1))
@@ -431,14 +544,17 @@ def get_data(filters):
                         'particulars': e.item_name,
                         'amount': e.base_net_amount + e.sgst_amount + e.cgst_amount,
                         'net_amount': e.base_net_amount,
-                        'sgst': e.sgst_amount,
-                        'cgst':  e.cgst_amount
+                        'sgst_rate': e.sgst_rate,
+                        'cgst_rate': e.cgst_rate,
+                        'sgst' + str(e['sgst_rate']) : e.sgst_amount,
+                        'cgst' + str(e['cgst_rate']):  e.cgst_amount
                     }
             elif e.igst_amount:
                 new_row = {
                         'particulars': e.item_name,
                         'amount': e.base_net_amount + e.igst_amount,
                         'net_amount': e.base_net_amount,
+                        'igst_rate': e.igst_rate,
                         'igst': e.igst_amount
                     }
             else:
