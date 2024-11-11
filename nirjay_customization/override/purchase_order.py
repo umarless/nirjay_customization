@@ -14,6 +14,8 @@ def before_save(doc, method=None):
             total_amount = total_rate * item.custom_qty_in_pcs
             custom_duty = total_amount * item.custom_basic_duty_rate / 100
             sws = custom_duty * 10 / 100
+            frapp.errprint(sws)
+            item.custom_social_welfare_surcharge = sws
             custom_igst_assessable_value = total_amount + custom_duty + sws
             item.custom_igst_assessable_value =  custom_igst_assessable_value
             custom_total_igst_assessable_value += custom_igst_assessable_value
