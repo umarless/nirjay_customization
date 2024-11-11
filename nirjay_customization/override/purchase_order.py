@@ -14,8 +14,8 @@ def before_save(doc, method=None):
             total_amount = total_rate * item.custom_qty_in_pcs
             custom_duty = total_amount * item.custom_basic_duty_rate / 100
             #  SOCIAL WELFARE SURCHARGE (%) = if 5 then take 5% of CUSTOM DUTY
-            if custom_social_welfare_surcharge_:
-                sws = custom_duty * custom_social_welfare_surcharge_ / 100
+            if item.custom_social_welfare_surcharge_:
+                sws = custom_duty * item.custom_social_welfare_surcharge_ / 100
                 frappe.errprint(sws)
             else:
                 sws = custom_duty * 10 / 100
