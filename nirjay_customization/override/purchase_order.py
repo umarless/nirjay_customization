@@ -41,3 +41,4 @@ def before_save(doc, method=None):
             custom_total_igst_assessable_value += custom_igst_assessable_value
 
     doc.custom_total_igst_assessable_value = custom_total_igst_assessable_value
+    doc.reload()
