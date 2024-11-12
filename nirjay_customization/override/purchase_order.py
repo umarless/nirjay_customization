@@ -3,7 +3,7 @@ import frappe
 def before_save(doc, method=None):
     frappe.errprint(doc.custom_freight__insurance_)
     frappe.errprint(type(doc.custom_freight__insurance_))
-    is_string = isinstance(s, str)
+    is_string = isinstance(doc.custom_freight__insurance_, str)
     frappe.errprint(is_string)
     if is_string:
         fi_percent = float(doc.custom_freight__insurance_)
