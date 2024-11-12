@@ -7,7 +7,9 @@ def before_save(doc, method=None):
     frappe.errprint(is_string)
     if is_string:
         fi_percent = float(doc.custom_freight__insurance_)
-    
+    else:
+        fi_percent = doc.custom_freight__insurance_
+
     custom_total_igst_assessable_value = 0
      
     for item in doc.items:
