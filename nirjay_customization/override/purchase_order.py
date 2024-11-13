@@ -25,6 +25,7 @@ def before_save(doc, method=None):
             total_rate = item.custom_rate_per_pcs + fi
             total_amount = total_rate * item.custom_qty_in_pcs
             custom_duty = total_amount * item.custom_basic_duty_rate / 100
+            item.custom_basic_duty_amount = custom_duty
             #  SOCIAL WELFARE SURCHARGE (%) = if 5 then take 5% of CUSTOM DUTY
             sws = 0
             if item.custom_social_welfare_surcharge_:
