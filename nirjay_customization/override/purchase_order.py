@@ -23,6 +23,7 @@ def before_save(doc, method=None):
             frappe.errprint(type(item.base_rate / item.custom_pack))
             fi = item.custom_rate_per_pcs * fi_percent / 100
             total_rate = item.custom_rate_per_pcs + fi
+            item.custom_rate_per_pcs_withfreight__insurance = total_rate
             total_amount = total_rate * item.custom_qty_in_pcs
             item.custom_total_amount_freight__insurance = total_amount
             custom_duty = total_amount * item.custom_basic_duty_rate / 100
