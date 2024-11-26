@@ -28,7 +28,7 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+# doctype_js = {"Purchase Order" : "public/purchase_order.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -124,9 +124,13 @@ app_license = "mit"
 
 doc_events = {
 	"Purchase Order": {
-		"before_save": "nirjay_customization.override.purchase_order.before_save"
+		"before_save": "nirjay_customization.override.purchase_order.before_save",
+        "validate": "nirjay_customization.override.purchase_order.validate",
 	}
 }
+
+
+
 
 # Scheduled Tasks
 # ---------------

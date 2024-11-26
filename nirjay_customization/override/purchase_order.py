@@ -1,6 +1,11 @@
 import frappe
 
+def validate(doc,method=None):
+    custom_set_freight_insurance(doc,method)
+   
+
 def before_save(doc, method=None):
+    
     frappe.errprint(doc.custom_freight__insurance_)
     frappe.errprint(type(doc.custom_freight__insurance_))
     is_string = isinstance(doc.custom_freight__insurance_, str)
@@ -44,4 +49,37 @@ def before_save(doc, method=None):
             custom_total_igst_assessable_value += custom_igst_assessable_value
 
     doc.custom_total_igst_assessable_value = custom_total_igst_assessable_value
-    # doc.reload()
+    
+    calculate_total(doc, method)
+    
+#calculation of custom_social_welfare_surcharge and custom duty
+@frappe.whitelist()
+def calculate_total(doc, method):                                                                                                                                                                                                                                                                                                                                                                                                                 
+    total_c = 0
+    total_s = 0
+    for item in doc.items:
+        total_s += item.custom_social_welfare_surcharge or 0
+        total_c += item.custom_basic_duty_amount or 0
+    doc.custom_custom_duty = total_c
+    doc.custom_total_social_welfare_surcharge = total_s
+    
+
+# Freight + Insurance % value  fetched from the last PO
+@frappe.whitelist()
+def custom_set_freight_insurance(doc,method):
+    if not doc.custom_freight__insurance_:
+        last_po = frappe.db.get_value(
+            "Purchase Order",
+            {
+                "supplier":doc.supplier,"docstatus":1
+            },
+            ["name","custom_freight__insurance_"],
+            order_by="creation desc"
+        )
+        if last_po:
+            last_po_name, last_freight_insurance = last_po
+            doc.custom_freight__insurance_ = last_freight_insurance
+        else:
+            frappe.msgprint(f"Add Freight & Insurance (%) Value")
+        
+
