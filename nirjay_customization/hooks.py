@@ -243,7 +243,7 @@ fixtures = [
                 "Purchase Order Item-custom_igst_assessable_value",
                 "Purchase Order-custom_total_igst_assessable_value",
                 "Purchase Invoice-custom_expense_against_purchase_order",
-                "Purchase Invoice-custom_is_expense"
+                "Purchase Invoice-custom_is_expense",
             ]
         ]
     ]}]
