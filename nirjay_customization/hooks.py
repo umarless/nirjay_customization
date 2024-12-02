@@ -122,11 +122,21 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
+# doc_events = {
+# 	"Purchase Order": {
+# 		"before_save": "nirjay_customization.override.purchase_order.before_save",
+#         "validate": "nirjay_customization.override.purchase_order.validate",
+# 	}
+# }
+
 doc_events = {
-	"Purchase Order": {
-		"before_save": "nirjay_customization.override.purchase_order.before_save",
+    "Purchase Order": {
+        "before_save": "nirjay_customization.override.purchase_order.before_save",
         "validate": "nirjay_customization.override.purchase_order.validate",
-	}
+    },
+    "Delivery Note": {
+        "on_submit": "nirjay_customization.override.delivery_note.create_stock_entry",
+    },
 }
 
 
