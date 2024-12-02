@@ -8,10 +8,9 @@ def create_stock_entry(doc, method):
     stock_entry.company = doc.company
     stock_entry.from_warehouse = doc.set_warehouse
 
-    default_uom = "Nos"
 
     for item in doc.custom_item:
-        item_uom = default_uom  
+        item_uom = item.uom  
         item_qty = item.ply or 0  
         # item_rate = item.rate_per_box  
         item_warehouse = item.source_warehouse or doc.set_warehouse  
