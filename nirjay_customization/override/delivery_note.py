@@ -20,8 +20,8 @@ def create_stock_entry(doc, method):
             "qty": item_qty,
             "transfer_qty" : item_qty,
             "uom": item_uom,
-            "stock_uom": item_uom,
-            "conversion_factor": 1,
+            # "stock_uom": item_uom,
+            # "conversion_factor": 1,
             "basic_rate": item.basic_rate,
             "warehouse": item_warehouse,
         })
