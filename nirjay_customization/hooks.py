@@ -134,9 +134,9 @@ doc_events = {
         "before_save": "nirjay_customization.override.purchase_order.before_save",
         "validate": "nirjay_customization.override.purchase_order.validate",
     },
-    # "Delivery Note": {
-    #     "on_submit": "nirjay_customization.override.delivery_note.create_stock_entry",
-    # },
+    "Delivery Note": {
+        "on_submit": "nirjay_customization.override.delivery_note.create_stock_entry",
+    },
 }
 
 
