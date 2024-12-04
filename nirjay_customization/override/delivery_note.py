@@ -12,7 +12,6 @@ def create_stock_entry(doc, method):
     for item in doc.custom_carton_details:
         item_uom = item.uom  
         item_qty = item.ply or 0  
-        # item_rate = item.rate_per_box  
         item_warehouse = item.source_warehouse or doc.set_warehouse  
 
         stock_entry.append("items", {
@@ -31,28 +30,3 @@ def create_stock_entry(doc, method):
 
     frappe.msgprint(f"Stock Entry {stock_entry.name} has been created.")
 
-
-
-# import frappe
-
-# def create_stock_entry(doc, method):
-#     """
-#     Hook this function to the on_submit event of the relevant DocType.
-#     """
-#     for item in doc.items:  # Assuming `items` is the child table
-#         if item.custom_is_carton:
-#             # Create a new Stock Entry for Material Issue
-#             stock_entry = frappe.get_doc({
-#                 "doctype": "Stock Entry",
-#                 "stock_entry_type": "Material Issue",
-#                 "items": [{
-#                     "item_code": item.item_code,  # Link field in Items child table
-#                     "qty": item.qty,  # Quantity to issue
-#                     "s_warehouse": item.warehouse,  # Source warehouse
-#                 }]
-#             })
-#             # Submit the Stock Entry
-#             stock_entry.insert()
-#             stock_entry.submit()
-
-#             frappe.msgprint(f"Stock Entry {stock_entry.name} created for Item {item.item_code}")
