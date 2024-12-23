@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2024-12-23 10:23:40.429207",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_c73f",
+  "amended_from",
+  "naming_series",
+  "purchase_order",
+  "add_po",
+  "items",
+  "purchase_order_grand_total",
+  "section_break_mhqj",
+  "currency",
+  "exchange_rate",
+  "price_list"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_c73f",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Multi Purchase Order",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Small Text",
+   "label": "Purchase Order"
+  },
+  {
+   "fieldname": "add_po",
+   "fieldtype": "Button",
+   "label": "Select Purchase Order"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Purchase Order",
+   "options": "Purchase Order Item CT"
+  },
+  {
+   "default": "PO.FY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Series",
+   "no_copy": 1,
+   "options": "PO.FY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "purchase_order_grand_total",
+   "fieldtype": "Float",
+   "label": "Purchase Order Grand Total"
+  },
+  {
+   "fieldname": "section_break_mhqj",
+   "fieldtype": "Section Break",
+   "label": "Currency and Price List"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate"
+  },
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-12-23 12:26:09.216182",
+ "modified_by": "Administrator",
+ "module": "Nirjay Customization",
+ "name": "Multi Purchase Order",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
