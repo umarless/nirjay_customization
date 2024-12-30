@@ -17,7 +17,7 @@ def make_purchase_invoice(source_name, target_doc=None):
                 "field_map": { 
                     "amended_from": "amended_from",  
                     "purchase_order": "purchase_order",  
-                    "items": "items",  
+                    # "items": "items",  
                     "purchase_order_grand_total": "grand_total",  
                     "currency": "currency", 
                     "exchange_rate": "conversion_rate",  
