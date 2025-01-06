@@ -257,3 +257,10 @@ fixtures = [
             ]
         ]
     ]}]
+
+
+
+override_doctype_dashboards = {
+    "Multi Purchase Order": "nirjay_customization.override.multi_purchase_order_dashboard.get_dashboard_data",
+}
+
