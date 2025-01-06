@@ -34,13 +34,15 @@ def get_columns():
         {
             'label': 'Multi Purchase Order',
             'fieldname': 'name',
-            'fieldtype': 'Data',
+            'fieldtype': 'Link',
+            'options' : 'Multi Purchase Order',
             'width': 150
         },
         {
             'label': 'Purchase Order',
             'fieldname': 'purchase_order',
-            'fieldtype': 'Data',
+            'fieldtype': 'Link',
+            'options' : 'Purchase Order',
             'width': 150
         },
         {
