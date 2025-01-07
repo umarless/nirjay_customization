@@ -46,6 +46,13 @@ def get_columns():
             'width': 150
         },
         {
+            'label': 'Purchase Invoice',
+            'fieldname': 'purchase_invoice',
+            'fieldtype': 'Link',
+            'options' : 'Purchase Invoice',
+            'width': 150
+        },
+        {
             'label': 'Expense',
             'fieldname': 'expense',
             'fieldtype': 'Data',
