@@ -45,6 +45,7 @@ def get_columns():
             'options' : 'Purchase Order',
             'width': 150
         },
+        
         {
             'label': 'Purchase Invoice',
             'fieldname': 'purchase_invoice',
