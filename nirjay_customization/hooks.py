@@ -11,7 +11,7 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/nirjay_customization/css/nirjay_customization.css"
-# app_include_js = "/assets/nirjay_customization/js/nirjay_customization.js"
+# app_include_js = "nirjay_customization/public/purchase_order.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/nirjay_customization/css/nirjay_customization.css"
@@ -28,7 +28,8 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"Purchase Order" : "public/purchase_order.js"}
+# doctype_js = {"Purchase Order" : "nirjay_customization/public/JS/purchase_order.js"}
+
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -136,6 +137,10 @@ doc_events = {
     },
     "Delivery Note": {
         "on_submit": "nirjay_customization.override.delivery_note.create_stock_entry",
+    },
+    "Purchase Invoice": {
+        "before_save": "nirjay_customization.override.purchase_invoice.before_save",
+        "validate": "nirjay_customization.override.purchase_invoice.validate",
     },
 }
 
